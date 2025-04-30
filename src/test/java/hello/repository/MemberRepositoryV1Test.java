@@ -1,5 +1,6 @@
 package hello.repository;
 
+import com.zaxxer.hikari.HikariDataSource;
 import hello.domain.Member;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +21,11 @@ class MemberRepositoryV1Test {
 
     @BeforeEach
     void beforeEach() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
+        HikariDataSource dataSource = new HikariDataSource();
+        dataSource.setJdbcUrl(URL);
+        dataSource.setUsername(USERNAME);
+        dataSource.setPassword(PASSWORD);
+        dataSource.setMaximumPoolSize(10);
         repository = new MemberRepositoryV1(dataSource);
     }
 
