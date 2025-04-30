@@ -5,6 +5,7 @@ import hello.jdbc.connection.DBConnectionUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
+import java.util.NoSuchElementException;
 
 @Slf4j
 public class MemberRepositoryV0 {
@@ -29,6 +30,37 @@ public class MemberRepositoryV0 {
                근데 con이나 pstmt중 1개를 닫다가 에러가 터지면 뒤에껄 못 닫을 수 있음
                그래서 아래의 함수를 호출해서 닫도록 함 */
             close(con, pstmt, null);
+        }
+    }
+    
+    public Member findById(String memberId) throws SQLException {
+        String sql = "select * from member where member_id = ?";
+
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            con = getConnection();
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, memberId);
+            rs = pstmt.executeQuery();
+
+            // 한 번은 next를 해줘야 실제 데이터를 가져올 수 있음
+            if (rs.next()) {
+                Member member = new Member();
+                member.setMemberId(rs.getString("member_id"));
+                member.setMoney(rs.getInt("money"));
+                return member;
+            } else {
+                // rs가 포인터의 역할로 next()에 뭐가 없으면 예외를 던짐
+                throw new NoSuchElementException("member not found" + memberId);
+            }
+        } catch (SQLException e) {
+            log.error("db error", e);
+            throw e;
+        } finally {
+            close(con, pstmt, rs);
         }
     }
 
