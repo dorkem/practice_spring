@@ -9,6 +9,7 @@ import java.sql.*;
 @Slf4j
 public class MemberRepositoryV0 {
     public Member save (Member member) throws SQLException {
+        //sql injection을 예방하기 위해 무조건 "?"를 prepared statement로 바인딩 해줘야함
         String sql = "insert into member(member_id, money) values (?, ?)";
 
         Connection con = null;
