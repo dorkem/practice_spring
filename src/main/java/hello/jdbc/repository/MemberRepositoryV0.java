@@ -1,4 +1,4 @@
-package hello.repository;
+package hello.jdbc.repository;
 
 import hello.domain.Member;
 import hello.jdbc.connection.DBConnectionUtil;
