@@ -5,33 +5,30 @@ import hello.jdbc.repository.MemberRepositoryV3;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-
-import java.sql.Connection;
+import org.springframework.transaction.support.TransactionTemplate;
 import java.sql.SQLException;
 
 @RequiredArgsConstructor //final이나 @NotNull이 붙은 필드의 생성자를 만들어줌
 @Slf4j
 public class MemberServiceV3 {
 
-    private final PlatformTransactionManager transactionManager;
+    private final TransactionTemplate transactionTemplate;
     private final MemberRepositoryV3 memberRepository;
 
+    public MemberServiceV3(PlatformTransactionManager transactionManager, MemberRepositoryV3 memberRepository) {
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
+        this.memberRepository = memberRepository;
+    }
+
     public void accountTransfer(String fromId, String toId, int money) throws SQLException {
-
-        TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
-
-        try {
-            //비즈니스 로직
-            bizLogic(fromId, toId, money);
-            //성공시 커밋
-            transactionManager.commit(status);
-        } catch (Exception e) {
-            //실패시 롤백
-            transactionManager.rollback(status);
-            throw new IllegalStateException(e);
-        }
+        transactionTemplate.executeWithoutResult(status -> {
+           try {
+               //비즈니스 로직
+               bizLogic(fromId, toId, money);
+           } catch (Exception e) {
+               throw new IllegalStateException(e);
+           }
+       });
     }
 
     private void bizLogic(String fromId, String toId, int money) throws SQLException {
